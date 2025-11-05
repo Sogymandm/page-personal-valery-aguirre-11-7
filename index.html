@@ -92,14 +92,24 @@
 
         <div class="video-section">
           <div class="video-frame card">
-            <div class="video-inner">
-              <iframe title="Video explicativo"
-                src="https://youtu.be/9VSeaWiMDns"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen>
-              </iframe>
+              <div class="video-inner">
+                <video id="personalVideo" controls playsinline>
+                  <source src="Videos/Video_Valery.mp4" type="video/mp4">
+                </video>
+
+                <!-- overlay protector: glass with play button -->
+                <div class="video-overlay" id="videoOverlay" role="button" aria-label="Reproducir video">
+                  <div class="video-overlay-inner">
+                    <button class="play-btn" id="playBtn" aria-label="Reproducir video">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M5 3v18l15-9L5 3z" fill="currentColor"/>
+                      </svg>
+                    </button>
+                    <p class="overlay-text">Presiona para reproducir</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
 
           <div class="video-meta">
             <h3>Podcast - Video</h3>
@@ -173,6 +183,23 @@
           menuToggle.classList.toggle('is-open', navOpen);
           menuToggle.setAttribute('aria-expanded', String(navOpen));
           document.documentElement.classList.toggle('nav-locked', navOpen);
+        });
+      }
+
+      // Video overlay handler: hide overlay and start playback on click
+      const playBtn = document.getElementById('playBtn');
+      const overlay = document.getElementById('videoOverlay');
+      const videoEl = document.getElementById('personalVideo');
+      if (overlay && playBtn && videoEl) {
+        const startVideo = (e) => {
+          overlay.classList.add('hidden');
+          overlay.setAttribute('aria-hidden', 'true');
+          try { videoEl.play(); } catch (err) { /* ignore autoplay errors; user gesture */ }
+        };
+        playBtn.addEventListener('click', startVideo);
+        overlay.addEventListener('click', (e) => {
+          // if clicked outside the button (overlay background)
+          if (e.target === overlay) startVideo();
         });
       }
 
