@@ -62,6 +62,17 @@ body{
   padding:10px 0;
 }
 
+/* centerable nav pill - by default positioned inline; mobile override below */
+.nav-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 10px;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(255,255,255,0.6), rgba(247,178,217,0.06));
+  border:1px solid rgba(247,178,217,0.12);
+}
+
 /* brand */
 .brand{
   font-weight:700;
@@ -108,46 +119,27 @@ body{
 .main-nav a:hover{ color:var(--primary) }
 .main-nav a:hover::after{ width:calc(100% - 24px) }
 
-/* mobile toggle and hamburger -> X animation */
+/* ensure nav-pill is centered inside header container on desktop */
+.header-inner { position:relative }
+.header-inner .nav-pill { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); }
+
+/* mobile toggle placeholder (kept simple so nav remains functional)
+   The previous nested rules were invalid CSS and broke the menu. Keep
+   a simple, non-invasive toggle placeholder and use a media query
+   below for any small-screen adjustments if needed. */
 .menu-toggle{
   display:none;
   background:none;
   border:0;
-  cursor:pointer;
-  padding:8px;
-  border-radius:8px;
 }
 
-.hamburger{ display:inline-block; width:28px; height:18px; position:relative; }
-.bar{ position:absolute; left:0; right:0; height:2.6px; background:var(--text-dark); border-radius:3px; transition:transform .34s cubic-bezier(.2,.9,.23,1), opacity .26s ease, top .34s ease; }
-.bar-1{ top:0 } .bar-2{ top:8px } .bar-3{ top:16px }
-.menu-toggle.is-open .bar-1{ transform:translateY(8px) rotate(45deg); top:0 }
-.menu-toggle.is-open .bar-2{ opacity:0; transform:scaleX(.2) }
-.menu-toggle.is-open .bar-3{ transform:translateY(-8px) rotate(-45deg); top:16px }
-
-/* responsive nav behavior */
+/* Small adjustments for narrow viewports: show a simple toggle and
+   keep the main nav visible/usable (no fullscreen takeover). */
 @media (max-width:880px){
-  .main-nav{ display:none }
   .menu-toggle{ display:block }
-  .main-nav.open{
-    display:flex;
-    position:fixed;
-    left: 13%;
-    top: 95%;
-    z-index:130;
-    flex-direction:column;
-    gap:8px;
-    background:var(--card);
-    padding:12px;
-    border-radius:12px;
-    box-shadow:var(--shadow);
-    width:min(92%,360px);
-    max-width:360px;
-    animation:menuIn .32s cubic-bezier(.2,.9,.23,1);
-  }
-
-  @keyframes menuIn{ from{ opacity:0; transform:translateY(-8px) scale(.98) } to{ opacity:1; transform:translateY(0) scale(1) } }
-  .main-nav a{ padding:10px 14px }
+  /* keep nav items usable on small screens; stack if needed */
+  .main-nav{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center }
+  .header-inner .nav-pill{ position:static; transform:none; margin:0 auto }
 }
 
 /* sections centered with consistent spacing */
@@ -224,16 +216,99 @@ body{
 .video-section{
   width:100%;
   display:flex;
-  gap:18px;
-  align-items:flex-start;
+  gap:28px;
+  align-items:center;
   flex-wrap:wrap;
   justify-content:center;
 }
 
-.video-frame{ flex:1 1 520px; max-width:720px; border-radius:12px; overflow:hidden; }
-.video-inner{ position:relative; padding-top:56.25%; background:linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01)); }
-.video-inner iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
-.video-meta{ max-width:360px; flex:0 0 auto; color:var(--muted); align-self:center }
+/* fixed large video box (desktop-friendly) */
+.video-frame{
+  width:720px; /* large fixed width */
+  max-width:92vw;
+  aspect-ratio:16/9; /* keep 16:9 */
+  flex:0 0 auto; /* prevent flex from resizing it */
+  border-radius:16px;
+  overflow:hidden;
+  position:relative;
+  background:linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.02));
+  box-shadow:0 24px 60px rgba(15,23,42,0.12);
+}
+
+.video-inner{ position:absolute; inset:0; display:block }
+.video-inner video,
+.video-inner iframe{ width:100%; height:100%; display:block; object-fit:cover; border:0 }
+
+.video-meta{ max-width:360px; flex:0 0 auto; color:var(--muted); align-self:center; text-align:center }
+
+/* overlay: glass protector until user clicks */
+.video-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.5));
+  backdrop-filter:blur(8px) saturate(120%);
+  -webkit-backdrop-filter:blur(8px) saturate(120%);
+  border:1px solid rgba(255,255,255,0.6);
+  z-index:8;
+  transition:opacity .36s ease, transform .36s cubic-bezier(.2,.9,.23,1);
+}
+
+.video-overlay.hidden{ opacity:0; pointer-events:none; transform:scale(.995) }
+
+.video-overlay-inner{ text-align:center; display:flex; flex-direction:column; gap:12px; align-items:center }
+
+/* decorative play button */
+.play-btn{
+  width:100px;
+  height:100px;
+  border-radius:999px;
+  display:inline-grid;
+  place-items:center;
+  background:linear-gradient(135deg,var(--accent-pink), #ffd1e9 60%, var(--primary));
+  color:white;
+  border:2px solid rgba(255,255,255,0.9);
+  box-shadow:0 18px 48px rgba(15,23,42,0.18), 0 2px 6px rgba(0,0,0,0.06) inset;
+  cursor:pointer;
+  transition:transform .28s cubic-bezier(.2,.9,.23,1), box-shadow .28s ease;
+  transform-origin:center;
+}
+
+.play-btn:hover{ transform:translateY(-6px) scale(1.03); box-shadow:0 24px 64px rgba(15,23,42,0.24) }
+.play-btn:active{ transform:translateY(-2px) scale(.99) }
+
+/* subtle pulsing ring */
+.play-btn::before{
+  content:'';
+  position:absolute;
+  width:140px;
+  height:140px;
+  border-radius:999px;
+  background:radial-gradient(circle, rgba(247,178,217,0.18) 0%, rgba(247,178,217,0) 60%);
+  z-index:-1;
+  animation:btnPulse 2.4s infinite ease-in-out;
+}
+
+@keyframes btnPulse{
+  0%{ transform:scale(.95); opacity:0.9 }
+  50%{ transform:scale(1.08); opacity:0.6 }
+  100%{ transform:scale(.95); opacity:0.9 }
+}
+
+.overlay-text{ margin:0; color:#333; font-weight:600 }
+
+@media (max-width:900px){
+  .video-frame{ width:560px }
+}
+
+@media (max-width:520px){
+  .video-frame{ width:92vw }
+  .video-meta{ display:none }
+  .play-btn{ width:80px; height:80px }
+  .play-btn::before{ width:110px; height:110px }
+}
 
 /* gallery layout */
 .map-card{
@@ -261,19 +336,37 @@ body{
   justify-items:center;
 }
 
-.thumb{ width:100%; max-width:360px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; }
-.thumb img{ width:100%; height:160px; object-fit:cover; border-radius:8px; box-shadow:var(--shadow); transition:transform .32s ease }
+.thumb{
+  width:100%;
+  max-width:300px; /* slightly reduced so thumbnails feel comfortable */
+  display:flex;
+  flex-direction:column;
+  align-items:stretch; /* stretch so image fills available width consistently */
+  gap:8px;
+  padding:10px; /* slightly smaller padding to reduce card variance */
+}
+.thumb img{
+  display:block; /* remove inline gaps */
+  width:100%;
+  aspect-ratio:1/1; /* square thumbnails for equal, comfortable proportion */
+  height:auto;
+  object-fit:cover;
+  border-radius:8px;
+  box-shadow:var(--shadow);
+  transition:transform .32s ease;
+}
 .thumb img:hover{ transform:scale(1.03) }
-.thumb figcaption{ font-size:0.95rem; color:var(--muted); text-align:center }
+.thumb figcaption{ font-size:0.95rem; color:var(--muted); text-align:center; margin-top:8px; line-height:1.3 }
 
 /* footer */
 .site-footer{
   width:100%;
-  padding:20px 0;
+  padding:12px 0; /* slightly reduced to save vertical space */
   background:linear-gradient(90deg,var(--secondary),var(--accent-pink));
   color:#fff;
   text-align:center;
-  border-top:1px solid rgba(255,255,255,0.06);
+  border-top:1px solid rgba(255,255,255,0.04);
+  font-size:0.95rem;
 }
 
 /* responsive adjustments and spacing refinements */
@@ -297,6 +390,6 @@ body{
   .header-inner{ padding:8px 0 }
   .brand{ font-size:1rem }
   .container{ padding:12px 14px }
-  .thumb img{ height:140px }
+  /* keep thumbs using the aspect-ratio above for symmetry on small screens */
   html.nav-locked, body.nav-locked{ height:100%; overflow:hidden }
 }
